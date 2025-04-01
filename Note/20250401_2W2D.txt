@@ -18,3 +18,18 @@
 	- Kubernetes 공식 문서
 	- AWS/Azure 공식 튜토리얼
 	- Docker 및 Kubernetes 기초 강의
+	
+1주차 6일차 강의 자료 
+
+56p
+Observability 구성요소
+	- 로그 
+	- 메트릭 
+	- 트레이스 
+	- 이벤트
+	
+58p
+Observability 주의점
+	- 과부하 !!
+	- 데이터 보관 비용
+	- 민감 정보 처리
