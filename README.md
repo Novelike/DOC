@@ -8,7 +8,7 @@
 
 ## ✅ 문제 2. 당근마켓 (지역 기반 중고거래 서비스)
 
-🔗 2. [당근마켓](https://github.com/Novelike/DOC/tree/master/diagram/erd/baemin/carrot.md)
+🔗 2. [당근마켓](https://github.com/Novelike/DOC/tree/master/diagram/erd/carrot/carrot.md)
 
 ## ✅ 문제 3. 직방 (부동산 중개 서비스)
 
