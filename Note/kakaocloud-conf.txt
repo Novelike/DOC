@@ -1,5 +1,5 @@
 kakao cloud config
 
-test-instance-kjh
-	public ip
-		- 210.109.54.184
+mongodb cloud 
+	- user : kjh
+	- password : wogus0130@

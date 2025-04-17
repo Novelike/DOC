@@ -1,0 +1,192 @@
+SHOW DATABASES;
+USE sakila;
+DESCRIBE actor;
+DESCRIBE film_actor;
+DESCRIBE city;
+DESCRIBE film;
+
+SELECT *
+FROM actor
+WHERE first_name LIKE '%a'
+ORDER BY actor_id desc
+LIMIT 10;
+
+CREATE TABLE test_table
+(
+	id          INT AUTO_INCREMENT PRIMARY KEY,
+	name        VARCHAR(50),
+	description TEXT
+);
+
+DESCRIBE test_table;
+
+SELECT *
+FROM test_table;
+
+INSERT INTO test_table (name, description)
+VALUES ('test name', 'This is a sample description');
+
+CREATE TABLE test_table2
+(
+	id          INT PRIMARY KEY,
+	name        VARCHAR(50),
+	description TEXT
+);
+
+INSERT INTO test_table2
+VALUES (1, 'Test name', 'This is a sample description.');
+
+SELECT *
+FROM test_table2;
+
+CREATE TABLE test_table3
+(
+	id          INT AUTO_INCREMENT PRIMARY KEY,
+	name        VARCHAR(50),
+	description VARCHAR(100) DEFAULT 'no description'
+);
+
+INSERT INTO test_table3 (name)
+VALUES ('Test name');
+
+SELECT *
+FROM test_table3;
+
+DELETE
+FROM test_table3
+WHERE id = 1;
+
+# SHOW TABLES FROM sakila WHERE Tables_in_sakila like '%test%';
+
+DROP TABLE test_table3;
+
+UPDATE test_table2
+SET description = 'Updated description.'
+WHERE id = 1;
+
+SELECT COUNT(*) AS total_films
+FROM film
+WHERE rating = 'G';
+
+SELECT rating, COUNT(*) AS film_count
+FROM film
+GROUP BY rating
+ORDER BY film_count DESC;
+
+SELECT film.release_year, COUNT(*) AS film_count
+FROM film
+GROUP BY release_year
+ORDER BY film_count DESC;
+
+SELECT AVG(film.length) AS average_length
+FROM film;
+
+SELECT film.length, COUNT(*) AS film_count
+FROM film
+GROUP BY film.length
+ORDER BY length DESC;
+
+SELECT film.rating, AVG(film.length) AS average_length_by_rating
+FROM film
+GROUP BY rating
+ORDER BY average_length_by_rating;
+
+SELECT title, rating, length, rental_rate
+FROM film
+WHERE rating = 'PG-13'
+  AND length > 120
+ORDER BY length
+LIMIT 5;
+
+SELECT STRAIGHT_JOIN a.first_name, a.last_name, f.title
+FROM film f
+	     INNER JOIN film_actor fa ON f.film_id = fa.film_id
+	     INNER JOIN actor a ON fa.actor_id = a.actor_id
+WHERE f.title LIKE 'ACADEMY%'
+  AND f.film_id IN (SELECT film_id FROM film WHERE title LIKE 'ACADEMY%')
+ORDER BY f.film_id;
+
+-- 대여 내역을 활용해 가장 인기 있는 영화 5편을 찾는 쿼리
+SELECT f.title, COUNT(*) AS film_count
+FROM film f
+	     INNER JOIN inventory i ON f.film_id = i.film_id
+	     INNER JOIN rental r ON i.inventory_id = r.inventory_id
+GROUP BY f.title
+ORDER BY film_count DESC
+LIMIT 5;
+
+-- 각 고객의 총 결제 금액을 계산하고 상위 5명을 조회
+SELECT CONCAT(c.first_name, ' ', c.last_name) AS customer_name,
+       SUM(p.amount)                          AS total_fee
+FROM customer c
+	     INNER JOIN payment p ON c.customer_id = p.customer_id
+GROUP BY c.customer_id
+ORDER BY total_fee DESC
+LIMIT 5;
+
+-- 대여 일자를 기반으로 월별 대여 건수를 집계
+SELECT DATE_FORMAT(rental_date, '%Y년 %c월') AS rental_month,
+       count(*)                            AS 건수
+FROM rental
+GROUP BY rental_month
+ORDER BY rental_month;
+
+-- 특정 조건에 따라 영화의 등급을 재분류 하는 예제
+-- CASE 구문을 활용하여 영화 대여 요금을 기준으로 등급 범주를 지정하는 방법을 보여줍니다.
+SELECT film_id,
+       title,
+       rental_rate AS cost,
+       CASE
+	       WHEN rental_rate < 1 THEN 'Low'
+	       WHEN rental_rate BETWEEN 1 AND 3 THEN 'Medium'
+	       WHEN rental_rate > 3 THEN 'High'
+	       ELSE 'Undefined'
+	       END     AS rental_category
+FROM film
+ORDER BY rental_rate;
+
+-- 성이 ‘SMITH’인 배우의 이름을 조회하는 쿼리를 작성하세요.
+SELECT CONCAT(first_name, ' ', last_name) AS actor_name
+FROM actor
+WHERE 1 = 1
+  AND first_name = 'ADAM'
+ORDER BY actor_name;
+
+-- 평균 영화 길이를 소숫점 둘째자리까지 출력하는 쿼리를 작성하세요.
+SELECT ROUND(AVG(length), 2) AS average_length
+FROM film;
+
+-- 고객과 주소 테이블을 조인하여 고객 이름과 도시 이름을 출력하세요
+SELECT CONCAT(cu.first_name, ' ', cu.last_name) AS customer_name, ct.city
+FROM   customer AS cu
+JOIN   address AS a ON cu.address_id = a.address_id
+JOIN   city AS ct ON a.city_id = ct.city_id
+ORDER BY customer_name;
+
+-- 영화 제목 중, ‘Action’ 카테고리에 속하는 영화 리스트를 서브쿼리를 활용하여 작성해 보세요.
+SELECT f.film_id,
+       f.title,
+       f.description,
+       f.release_year,
+       c.name AS film_category
+FROM film f
+INNER JOIN film_category fc ON f.film_id = fc.film_id
+INNER JOIN category c ON fc.category_id = c.category_id
+WHERE c.name = 'Action'
+ORDER BY f.title;
+
+-- 대여 날짜 및 시간을 기반으로, 하루 중 특정 시간대(예: 오전 9시 ~ 오후 5시)의 대여 건수를 집계하는 쿼리를 작성하세요.
+SELECT DATE_FORMAT(rental_date, '%Y년 %m월 %d일 %H시') AS rental_hour,
+       COUNT(*)                                       AS rental_hour_count
+FROM rental
+WHERE HOUR(rental_date) BETWEEN 9 AND 18
+GROUP BY rental_hour
+ORDER BY rental_hour;
+
+-- 각 고객의 마지막 대여 날짜를 확인하고, 지난 6개월 동안 대여 기록이 없는 고객을 찾는 쿼리를 작성해 보세요.
+SELECT CONCAT(c.first_name, ' ', c.last_name) AS customer_name,
+       r.rental_date
+FROM rental r
+	     INNER JOIN customer c ON r.customer_id = c.customer_id
+WHERE r.rental_date < DATE_SUB((SELECT MAX(rental_date) FROM rental), INTERVAL 6 MONTH)
+ORDER BY r.rental_date DESC;
